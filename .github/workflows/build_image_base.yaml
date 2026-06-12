@@ -45,6 +45,4 @@ jobs:
           cache-to: |
             type=inline,ref=ghcr.io/dhtc/cNMF:buildcache,mode=max
             type=gha,scope=buildcache-${{ github.ref_name }},mode=max
-
-          target: base
           tags: ghcr.io/dhtc/cnmf:v1
