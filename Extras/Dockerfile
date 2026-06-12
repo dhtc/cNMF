@@ -26,18 +26,12 @@ RUN set -eux; \
 # 只用 conda-forge + bioconda，**不混 defaults**（避免 channel 冲突）
 RUN conda create -n cnmf_env --yes \
         -c conda-forge -c bioconda \
-        python=3.7 \
-        fastcluster=1.1.26 matplotlib=3.3.2 numpy=1.19.2 \
-        palettable=3.3.0 pandas=1.1.3 scipy=1.5.2 \
-        scikit-learn=0.23.2 pyyaml=5.3.1 scanpy=1.6.0 \
-        parallel jupyterlab \
+        python \
+        fastcluster matplotlib numpy \
+        palettable pandas scipy \
+        scikit-learn pyyaml scanpy \
+        parallel jupyterlab cnmf harmonypy scikit-misc\
     && conda clean -afy
-
-# 切换后续 RUN 的 shell 自动进入 cnmf_env
-SHELL ["conda", "run", "-n", "cnmf_env", "/bin/bash", "-c"]
-
-# ---- 业务依赖（偶尔变 → 弱缓存层）----
-RUN pip install --no-build-isolation --no-cache-dir scikit-misc harmonypy cnmf
 
 WORKDIR /home
 CMD ["/bin/bash"]
