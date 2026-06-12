@@ -37,13 +37,7 @@ RUN conda create -n cnmf_env --yes \
 SHELL ["conda", "run", "-n", "cnmf_env", "/bin/bash", "-c"]
 
 # ---- 业务依赖（偶尔变 → 弱缓存层）----
-RUN pip install --no-build-isolation --no-cache-dir scikit-misc harmonypy
-
-# ---- cNMF 本体（经常变 → 弱缓存层，放最后）----
-WORKDIR /opt
-RUN git clone --depth 1 https://github.com/dylkot/cNMF.git /opt/cNMF \
-    && pip install --no-build-isolation --no-cache-dir /opt/cNMF \
-    && rm -rf /opt/cNMF/.git
+RUN pip install --no-build-isolation --no-cache-dir scikit-misc harmonypy cnmf
 
 WORKDIR /home
 CMD ["/bin/bash"]
