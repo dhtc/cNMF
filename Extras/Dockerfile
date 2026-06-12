@@ -30,7 +30,7 @@ RUN conda create -n cnmf_env --yes \
         fastcluster matplotlib numpy \
         palettable pandas scipy \
         scikit-learn pyyaml scanpy \
-        parallel jupyterlab cnmf harmonypy scikit-misc\
+        parallel jupyterlab cnmf harmonypy scikit-misc ipython\
     && conda clean -afy
 RUN  ipython kernel install --user --name=cnmf
 WORKDIR /home
