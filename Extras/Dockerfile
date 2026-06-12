@@ -27,6 +27,9 @@ RUN set -eux; \
 RUN conda create -n cnmf_env --yes \
         -c conda-forge -c bioconda \
         python=3.7 \
+        "pip=23.3.1" \
+        "setuptools=68.2.2" \
+        "wheel=0.41.2" \
         fastcluster=1.1.26 matplotlib=3.3.2 numpy=1.19.2 \
         palettable=3.3.0 pandas=1.1.3 scipy=1.5.2 \
         scikit-learn=0.23.2 pyyaml=5.3.1 scanpy=1.6.0 \
@@ -37,15 +40,15 @@ RUN conda create -n cnmf_env --yes \
 SHELL ["conda", "run", "-n", "cnmf_env", "/bin/bash", "-c"]
 
 # ---- 业务依赖（偶尔变 → 弱缓存层）----
-RUN pip install --no-cache-dir scikit-misc \
+RUN pip install --no-build-isolation --no-cache-dir scikit-misc \
     && git clone --depth 1 https://github.com/slowkow/harmonypy.git /tmp/harmonypy \
-    && pip install --no-cache-dir /tmp/harmonypy \
+    && pip install --no-build-isolation --no-cache-dir /tmp/harmonypy \
     && rm -rf /tmp/harmonypy
 
 # ---- cNMF 本体（经常变 → 弱缓存层，放最后）----
 WORKDIR /opt
 RUN git clone --depth 1 https://github.com/dylkot/cNMF.git /opt/cNMF \
-    && pip install --no-cache-dir /opt/cNMF \
+    && pip install --no-build-isolation --no-cache-dir /opt/cNMF \
     && rm -rf /opt/cNMF/.git
 
 WORKDIR /home
