@@ -35,5 +35,6 @@ source ~/.bashrc
 conda activate cnmf_env
 exec "$@"
 EOF
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]
