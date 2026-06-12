@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash -e {0} # -e to fail on error
+        shell: bash -e {0}
 
     permissions:
       contents: read
@@ -21,20 +21,30 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: Extras/Dockerfile
           push: true
-          cache-from: type=registry,ref=ghcr.io/dhtc/cNMF:buildcache
-          cache-to: type=inline,ref=ghcr.io/dhtc/cNMF:buildcache
+
+          # ---- 多源缓存读取（按优先级查找，第一个命中即用）----
+          cache-from: |
+            ghcr.io/dhtc/cnmf:v1                            # 1. 上一次 push 的镜像本身（layer 复用率最高）
+            type=gha,scope=buildcache-${{ github.ref_name }} # 2. GH Actions cache（按分支隔离、速度快）
+            type=registry,ref=ghcr.io/dhtc/cNMF:buildcache  # 3. registry 持久化 cache（跨 repo 共享）
+
+          # ---- 多目标缓存写入 ----
+          cache-to: |
+            type=inline,ref=ghcr.io/dhtc/cNMF:buildcache,mode=max
+            type=gha,scope=buildcache-${{ github.ref_name }},mode=max
+
           target: base
           tags: ghcr.io/dhtc/cnmf:v1
