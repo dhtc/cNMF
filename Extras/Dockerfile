@@ -22,6 +22,7 @@ ENV PATH /opt/miniconda3/bin:$PATH
 
 # Updating conda packages
 RUN conda update conda -y
+RUN conda init
 
 # Prepare cNMF env
 RUN echo "source activate cnmf_env" > ~/.bashrc
