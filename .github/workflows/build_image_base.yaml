@@ -37,4 +37,4 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/dhtc/cNMF:buildcache
           cache-to: type=inline,ref=ghcr.io/dhtc/cNMF:buildcache
           target: base
-          tags: ghcr.io/dhtc/cNMF:v1
+          tags: ghcr.io/dhtc/cnmf:v1
