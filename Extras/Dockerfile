@@ -10,9 +10,12 @@ RUN apt-get update && yes|apt-get upgrade
 RUN apt-get install -y wget bzip2 parallel git-core libopenblas-dev cmake
 
 # Anaconda installing
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
-RUN rm Miniconda3-latest-Linux-x86_64.sh
+RUN set -eux; \
+    wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" \
+         -O /tmp/miniforge.sh && \
+    bash /tmp/miniforge.sh -b -p /opt/miniconda3 && \
+    rm /tmp/miniforge.sh && \
+    /opt/miniconda3/bin/conda clean -afy
 
 # Set path to conda
 ENV PATH /opt/miniconda3/bin:$PATH
