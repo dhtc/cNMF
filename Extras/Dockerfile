@@ -25,6 +25,6 @@ RUN conda create -n cnmf_env --yes \
         scikit-learn pyyaml scanpy \
         parallel jupyterlab cnmf harmonypy scikit-misc ipython\
     && conda clean -afy
-RUN  /opt/miniconda3/bin/ipython kernel install --user --name=cnmf
+RUN  /opt/miniconda3/envs/cnmf_env/bin/ipython kernel install --user --name=cnmf
 WORKDIR /home
 CMD ["/bin/bash"]
