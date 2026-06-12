@@ -42,7 +42,7 @@ jobs:
             type=registry,ref=ghcr.io/dhtc/cNMF:buildcache  # 3. registry 持久化 cache（跨 repo 共享）
 
           # ---- 多目标缓存写入 ----
-          cache-to: |
-            type=inline,ref=ghcr.io/dhtc/cNMF:buildcache,mode=max
-            type=gha,scope=buildcache-${{ github.ref_name }},mode=max
+          # cache-to: |
+          #   type=inline,ref=ghcr.io/dhtc/cNMF:buildcache,mode=max
+          #   type=gha,scope=buildcache-${{ github.ref_name }},mode=max
           tags: ghcr.io/dhtc/cnmf:v1
