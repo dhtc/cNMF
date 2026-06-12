@@ -1,37 +1,52 @@
-#Download base image ubuntu 16.04
-FROM ubuntu:16.04
+# ============================================================
+# Stage 1: runtime ——  最终镜像
+# ============================================================
+FROM ubuntu:22.04 AS base
 
-SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive \
+    PATH=/opt/miniconda3/bin:$PATH
 
-# Updating Ubuntu packages
-RUN apt-get update && yes|apt-get upgrade
-
-# Adding wget, bzip2, parallel, git
-RUN apt-get install -y wget bzip2 parallel git-core libopenblas-dev cmake
-
-# Anaconda installing
+# ---- 系统依赖（不常变 → 强缓存层）----
 RUN set -eux; \
-    wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        wget bzip2 ca-certificates git parallel \
+        libopenblas-dev cmake && \
+    rm -rf /var/lib/apt/lists/*
+
+# ---- Miniforge（不常变 → 强缓存层）----
+RUN set -eux; \
+    wget -q https://github.com/conda-forge/miniforge/releases/download/24.9.2-0/Miniforge3-24.9.2-0-Linux-x86_64.sh \
          -O /tmp/miniforge.sh && \
     bash /tmp/miniforge.sh -b -p /opt/miniconda3 && \
     rm /tmp/miniforge.sh && \
-    /opt/miniconda3/bin/conda clean -afy
+    conda clean -afy
 
-# Set path to conda
-ENV PATH /opt/miniconda3/bin:$PATH
+# ---- cnmf_env（偶尔变 → 弱缓存层）----
+# 只用 conda-forge + bioconda，**不混 defaults**（避免 channel 冲突）
+RUN conda create -n cnmf_env --yes \
+        -c conda-forge -c bioconda \
+        python=3.7 \
+        fastcluster=1.1.26 matplotlib=3.3.2 numpy=1.19.2 \
+        palettable=3.3.0 pandas=1.1.3 scipy=1.5.2 \
+        scikit-learn=0.23.2 pyyaml=5.3.1 scanpy=1.6.0 \
+        parallel jupyterlab \
+    && conda clean -afy
 
-# Updating conda packages
-RUN conda update conda -y
-RUN conda init
+# 切换后续 RUN 的 shell 自动进入 cnmf_env
+SHELL ["conda", "run", "-n", "cnmf_env", "/bin/bash", "-c"]
 
-# Prepare cNMF env
-RUN echo "source activate cnmf_env" > ~/.bashrc
-RUN conda create -n cnmf_env --yes --channel bioconda --channel conda-forge --channel defaults python==3.7 fastcluster==1.1.26 matplotlib==3.3.2 numpy==1.19.2 palettable==3.3.0 pandas==1.1.3 scipy==1.5.2 scikit-learn==0.23.2 pyyaml==5.3.1 scanpy==1.6.0 parallel jupyterlab && conda clean --yes --all
-RUN conda activate cnmf_env
-RUN git clone https://github.com/slowkow/harmonypy.git && cd harmonypy && pip install . && cd -
-RUN pip install scikit-misc
+# ---- 业务依赖（偶尔变 → 弱缓存层）----
+RUN pip install --no-cache-dir scikit-misc \
+    && git clone --depth 1 https://github.com/slowkow/harmonypy.git /tmp/harmonypy \
+    && pip install --no-cache-dir /tmp/harmonypy \
+    && rm -rf /tmp/harmonypy
 
-# Download cNMF
+# ---- cNMF 本体（经常变 → 弱缓存层，放最后）----
+WORKDIR /opt
+RUN git clone --depth 1 https://github.com/dylkot/cNMF.git /opt/cNMF \
+    && pip install --no-cache-dir /opt/cNMF \
+    && rm -rf /opt/cNMF/.git
+
 WORKDIR /home
-RUN git clone https://github.com/dylkot/cNMF.git && cd cNMF && pip install . && cd -
 CMD ["/bin/bash"]
