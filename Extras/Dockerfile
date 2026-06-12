@@ -26,5 +26,14 @@ RUN conda create -n cnmf_env --yes \
         parallel jupyterlab cnmf harmonypy scikit-misc ipython\
     && conda clean -afy
 RUN  /opt/miniconda3/envs/cnmf_env/bin/ipython kernel install --user --name=cnmf
-WORKDIR /home
+WORKDIR /Works
+COPY <<'EOF' /entrypoint.sh
+#!/bin/bash
+set -e
+conda init
+source ~/.bashrc
+conda activate cnmf_env
+exec "$@"
+EOF
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]
