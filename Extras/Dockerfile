@@ -32,7 +32,7 @@ COPY <<'EOF' /entrypoint.sh
 set -e
 conda init
 source ~/.bashrc
-conda activate cnmf_env
+
 exec "$@"
 EOF
 RUN chmod +x /entrypoint.sh
