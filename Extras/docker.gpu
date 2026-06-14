@@ -23,8 +23,9 @@ RUN conda create -n cnmf_env --yes \
         fastcluster matplotlib numpy \
         palettable pandas scipy \
         scikit-learn pyyaml scanpy \
-        parallel jupyterlab cnmf harmonypy scikit-misc ipython pytorch-gpu='2.12.0'\
+        parallel jupyterlab cnmf harmonypy scikit-misc ipython\
     && conda clean -afy
+RUN /opt/miniconda3/envs/cnmf_env/bin/pip install --no-cache torch torchvision --index-url https://download.pytorch.org/whl/cu124
 RUN /opt/miniconda3/envs/cnmf_env/bin/pip install git+https://github.com/dhtc/dhtc-harmonypy_8d5af57_last_v2_pytorch.git
 RUN  /opt/miniconda3/envs/cnmf_env/bin/ipython kernel install --user --name=cnmf
 WORKDIR /Works
