@@ -11,7 +11,9 @@ def moe_correct_ridge(Z_orig, Z_cos, Z_corr, R, W, K, Phi_Rk, Phi_moe, lamb):
     for i in range(K):
         Phi_Rk = np.multiply(Phi_moe, R[i,:])
         x = np.dot(Phi_Rk, Phi_moe.T) + lamb
-        W = np.dot(np.dot(np.linalg.inv(x), Phi_Rk), Z_orig.T)
+        # W = np.dot(np.dot(np.linalg.inv(x), Phi_Rk), Z_orig.T) # modified by dhtc here, use lstsq replace the inv for Singular matrix
+        B = np.dot(Phi_Rk, Z_orig.T)
+        W, _, _, _ = np.linalg.lstsq(x, B, rcond=None)
         W[0,:] = 0 # do not remove the intercept
         Z_corr -= np.dot(W.T, Phi_Rk)
     Z_cos = Z_corr / np.linalg.norm(Z_corr, ord=2, axis=0)
